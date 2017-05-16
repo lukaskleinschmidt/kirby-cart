@@ -2,17 +2,14 @@
 // Cart snippet
 $cart = cart();
 
-$cart = new LukasKleinschmidt\Cart();
-$cart->filter(function() {
+// $cart = new LukasKleinschmidt\Cart();
+cartpage::$filter['percentage'] = function($cart, $amount) {
+  $total = $cart->filtered('total') * $amount;
+  return compact('total');
+};
 
-});
+$cart->filter('percentage', 0.7);
 
-
-cart::$filter['30-percent-off'] = function(Cart $cart) {
-  return array(
-    'price' => $cart->total() * 0.7;
-  )
-}
 
 // field::$methods['filter'] = function($field, $filter = null) {
 //   if(is_null($filter)) {
@@ -30,16 +27,21 @@ cart::$filter['30-percent-off'] = function(Cart $cart) {
 
 item::$filter['buy-3-get-1-free'] = function(Item $item) {
   return array(
-    'total' => $item->filtered('total') - floor($item->amount() / 3)) * $item->page()->price(),
+    'total' => $item->filtered('total') - floor($item->quantity() / 3)) * $item->page()->price(),
   );
 }
 
-
-class ItemPage extends Page {
+class Item {
 
   public static $filter = array();
 
+}
+
+class ItemPage extends Page {
+
   public $total;
+  public $filtered;
+  public $quantity;
 
   protected $data = array();
 
@@ -49,38 +51,75 @@ class ItemPage extends Page {
 
   public function total() {
     if(!is_null($this->total) return $this->total;
-    return $this->total = $this->page()->price() * $this->amount();
+    return $this->total = $this->page()->price() * $this->quantity();
   }
 
   /**
    * Check if a filter is apllied
    * @return boolean [description]
    */
-  public function hasFilter() {
+  public function hasFilter($key) {
 
   }
 
+
+  // /**
+  //  * Get filtered value
+  //  * @param  [type] $key [description]
+  //  * @return [type]      [description]
+  //  */
+  // public function filtered($key) {
+  //   if(isset($this->data[$key]) return $this->data[$key];
+  //   return $this->data[$key] = $this->{$key}();
+  // }
+
   /**
-   * Apply filter
+   * Apply required filter
    * @return [type] [description]
    */
-  public function filter() {
-
+  public function filtered() {
+    if(isset($this->filtered]) return $this->filtered;
+    return $this->filtered = new Filter($this, $this->filter());
   }
-
-  /**
-   * Get filtered value
-   * @param  [type] $key [description]
-   * @return [type]      [description]
-   */
-  public function filtered($key) {
-    if(isset($this->data[$key]) return $this->data[$key];
-    return $this->data[$key] = $this->{$key}();
-  }
-
-  // public function
 
 }
+
+class Filter extends Silo {
+
+  public $filter = array();
+
+  public function __construct($page, $filter = array()) {
+    foreach($filter as $key) {
+      $this->apply($key);
+    }
+  }
+
+  public function apply($key) {
+    $filter = $this->get($key);
+
+    if(!is_null($filter)) {
+      $this->filter[] = $key;
+    }
+
+    $data = $filter($this);
+  }
+
+  public function __call($method, $arguments) {
+    return isset($this->$method) ? $this->$method : null;
+  }
+
+}
+
+filter::set('percentage', function() {
+  $total = $this->total() * 0.7;
+  return $field;
+});
+
+filter::set('buy-three-for-two', function() {
+  $total = $this->total() - floor($this->quantity() / 3)) * $this->price();
+  return compact('total');
+});
+
 
 ?>
 <form action="<?= $cart->url('update') ?>" method="post">
@@ -89,7 +128,7 @@ class ItemPage extends Page {
     <span><?= $item->title(); ?></span>
 
     <?php if($item->hasFilter('buy-3-get-1-free')): ?>
-      <span><?= $item->total(); ?>€</span> statt <span><?= $item->filtered('total'); ?>€</span>
+      <span><?= $item->total(); ?>€</span> statt <span><?= $item->filtered()->total(); ?>€</span>
     <?php else: ?>
       <span><?= $item->total(); ?>€</span>
     <?php endif; ?>
@@ -103,4 +142,53 @@ class ItemPage extends Page {
 
   <?php endforeach; ?>
   <button type="submit">Update</button>
+</form>
+
+<?php
+
+$cart = cart();
+
+?>
+
+<form action="<?= $cart->action('update'); ?>">
+  <div class="item">
+    <?php foreach($cart->items() as $item): ?>
+
+      <div class="item__title">
+        <?= $item->title(); ?>
+      </div>
+
+      <?php if($item->isFiltered('total')): ?>
+        <div class="item__price">
+          <?= $item->total(); ?>€
+          statt
+          <?= $item->filtered()->total(); ?>€
+        </div>
+      <?php else: ?>
+        <div class="item__price">
+          <?= $item->total(); ?>€
+        </div>
+      <?php endif; ?>
+
+      <?php foreach($item->filter() as $filter): ?>
+        <div class="item__filter">
+          <?= $filter; ?>
+        </div>
+      <?php endforeach;  ?>
+
+      <input type="number" name="<?= $item->name('quantity'); ?>" value="<?= $item->quantity(); ?>">
+
+    <?php endforeach;  ?>
+  </div>
+  <div class="cart">
+    <div class="cart__total">
+      <?= $cart->total(); ?>€
+
+      <?php foreach($cart->filter() as $filter): ?>
+        <div class="cart__filter">
+          <?= $filter; ?>
+        </div>
+      <?php endforeach;  ?>
+    </div>
+  </div>
 </form>
