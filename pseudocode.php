@@ -15,12 +15,14 @@ field::$methods['filter'] = function($field, $key = null) {
     }
   }
 
-  $class  = $page->filter($key);
+  if(!isset($field->page->filtered[$field->key][$key])) return $field->page->filtered[$field->key][$key];
+
+  $class  = $page->filter($key) . 'filter';
   $filter = new $class($field);
 
-  $field->value = $filter->execute();
+  $field->value = $filter->apply();
 
-  return $field;
+  return $field->page->filtered[$field->key][$key] = $field;
 
 };
 
@@ -29,6 +31,7 @@ field::$methods['filter'] = function($field, $key = null) {
 
 foreach($order->items() as $item) {
   $item->total()->filter();
+  $item->total();
 }
 
 
