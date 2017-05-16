@@ -1,6 +1,43 @@
 <?php
-// Cart snippet
+
 $cart = cart();
+$order = order();
+
+field::$methods['filter'] = function($field, $key = null) {
+
+  if(is_null($key)) {
+    $filter = $field->page->filter();
+
+    if(is_null($filter)) return $field;
+
+    foreach($filter as $key) {
+      return $field->filter($key);
+    }
+  }
+
+  $class  = $page->filter($key);
+  $filter = new $class($field);
+
+  $field->value = $filter->execute();
+
+  return $field;
+
+};
+
+
+
+
+foreach($order->items() as $item) {
+  $item->total()->filter();
+}
+
+
+
+
+
+
+
+
 
 // $cart = new LukasKleinschmidt\Cart();
 cartpage::$filter['percentage'] = function($cart, $amount) {
