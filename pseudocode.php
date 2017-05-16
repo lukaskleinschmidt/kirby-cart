@@ -3,7 +3,7 @@
 $cart = cart();
 $order = order();
 
-field::$methods['filter'] = function($field, $key = null) {
+field::$methods['applyFilter'] = function($field, $key = null) {
 
   if(is_null($key)) {
     $filter = $field->page->filter();
@@ -11,7 +11,7 @@ field::$methods['filter'] = function($field, $key = null) {
     if(is_null($filter)) return $field;
 
     foreach($filter as $key) {
-      return $field->filter($key);
+      return $field->applyFilter($key);
     }
   }
 
@@ -20,7 +20,7 @@ field::$methods['filter'] = function($field, $key = null) {
   $class  = $page->filter($key) . 'filter';
   $filter = new $class($field);
 
-  $field->value = $filter->apply();
+  $field->value = $filter->apply($arguments);
 
   return $field->page->filtered[$field->key][$key] = $field;
 
@@ -30,7 +30,7 @@ field::$methods['filter'] = function($field, $key = null) {
 
 
 foreach($order->items() as $item) {
-  $item->total()->filter();
+  $item->total()->applyFilter();
   $item->total();
 }
 
