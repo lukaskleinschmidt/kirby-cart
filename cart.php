@@ -6,18 +6,31 @@ $kirby->set('blueprint', 'item', __DIR__ . DS . 'blueprints' . DS . 'item.yml');
 
 $kirby->set('route', array(
   'pattern' => c::get('cart.endpoint', 'cart') . '/update/(:all)',
-  'action' => function($id) {
+  'action' => function($id) use($kirby) {
     try {
+
       $item = cart()->find($id);
       $data = array_intersect_key(get('data'), array_flip(array('amount')));
       $item->update($data);
+
     } catch(Exception $e) {
+
+      if(r::ajax()) {
+        return response::json(array(
+          'success' => false,
+          'message' => $e->getMessage(),
+        ));
+      }
+
+    }
+
+    if(r::ajax()) {
       return response::json(array(
-        'success' => false,
-        'message' => $e->getMessage(),
+
       ));
     }
 
+    return go(get('_redirect'));
   },
 ));
 
@@ -32,7 +45,6 @@ $kirby->set('route', array(
     return site()->visit('error');
   },
 ));
-
 
 // c::get('cart.endpoint', 'api/cart');
 // c::get('cart.persitent', true);
