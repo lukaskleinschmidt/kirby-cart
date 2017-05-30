@@ -50,8 +50,12 @@ class Cart {
     return $this->page()->children();
   }
 
+  public function exists() {
+    return $this->parent()->find($this->id()) ? true : false;
+  }
+
   public function empty() {
-    return $this->parent()->find($this->id()) ? false : true;
+    return !$this->exists() || !$this->page()->children()->count();
   }
 
   public function create() {
