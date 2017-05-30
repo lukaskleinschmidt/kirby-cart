@@ -22,8 +22,6 @@ class Cart {
     // start session
     s::start();
 
-    $this->id = s::id();
-
   }
 
   public static function instance() {
@@ -37,7 +35,8 @@ class Cart {
    * @return string
    */
   public function id() {
-    return $this->id;
+    if(!is_null($this->id)) return $this->id;
+    return $this->id = s::id();
   }
 
   /**
@@ -119,6 +118,27 @@ class Cart {
   public function create($data = array()) {
     $parent = $this->parent();
     return $parent->create($parent->id() . '/' . $this->id(), Settings::blueprint(), $data);
+  }
+
+  /**
+   * Regenerate id
+   *
+   * @return string
+   */
+  public function regenerateId() {
+
+    // regenerate session id
+    s::regenerateId();
+
+    // new session id
+    $id = s::id();
+
+    if($this->exists()) {
+      $this->page()->move($id);
+    }
+
+    return $this->id = $id;
+
   }
 
 }
