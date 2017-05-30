@@ -3,6 +3,7 @@
 namespace LukasKleinschmidt\Cart;
 
 use S;
+use Exception;
 
 class Cart {
 
