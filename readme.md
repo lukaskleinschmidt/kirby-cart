@@ -1,7 +1,7 @@
 # Kirby Cart
 Create session related pages. This repository is not meant to be a full blown cart solution. It only comes with a simple helper class. Therefore you need to add routes and/or controller logic by yourself. Use the `cart()` helper function to get the cart instance.
 
-## Options
+### Options
 Available options and their default values.
 ```php
 c::set('cart.root', 'carts');        // page containing carts
@@ -10,7 +10,7 @@ c::set('cart.session.timeout', 120); // session timeout
 c::set('cart.session.lifetime', 0);  // session lifetime
 ```
 
-##Exemplary routes
+### Exemplary routes
 ```php
 $kirby->set('route', array(
   'pattern' => 'cart/add/(:all)',
@@ -56,7 +56,7 @@ $kirby->set('route', array(
 
 ```
 
-## Exemplary controller
+### Exemplary controller
 ```php
 namespace LukasKleinschmidt;
 
