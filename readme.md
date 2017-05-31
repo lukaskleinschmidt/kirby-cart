@@ -75,7 +75,7 @@ class CartController {
       return static::error();
     }
 
-    if($cart->item($page->hash())) {
+    if($cart->find($page->hash())) {
       static::increment($page->hash());
     } else {
       $items = $cart->children();
