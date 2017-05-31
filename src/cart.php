@@ -40,7 +40,7 @@ class Cart {
   }
 
   /**
-   * Get parent page which contains all carts
+   * Returns the parent page element
    *
    * @return Page
    */
@@ -57,7 +57,7 @@ class Cart {
   }
 
   /**
-   * Get the related cart page or create a new page
+   * Returns the page element
    *
    * @return Page
    */
@@ -74,26 +74,25 @@ class Cart {
   }
 
   /**
-   * Get cart subpage by uid
+   * Find any child or a set of children of this page
    *
-   * @param string $uid
-   * @return mixed Page or false
+   * @return Page | Children
    */
-  public function item($uid) {
-    return $this->page()->find($uid);
+  public function find() {
+    return call_user_func_array(array($this->children(), 'find'), func_get_args());
   }
 
   /**
-   * Get cart children
+   * Returns all children for this page
    *
    * @return Children
    */
-  public function items() {
+  public function children() {
     return $this->page()->children();
   }
 
   /**
-   * Checks if the cart page exists
+   * Checks if the cart exists
    *
    * @return boolean
    */
@@ -102,16 +101,16 @@ class Cart {
   }
 
   /**
-   * Checks if the cart is empty
+   * Checks if the page has children
    *
    * @return boolean
    */
-  public function empty() {
-    return !$this->exists() || !$this->page()->children()->count();
+  public function hasChildren() {
+    return $this->exists() && $this->page()->children()->count();
   }
 
   /**
-   * Create a new cart page
+   * Create a new cart
    *
    * @return Page
    */
@@ -121,7 +120,7 @@ class Cart {
   }
 
   /**
-   * Regenerate id
+   * Regenerate session id
    *
    * @return string
    */
